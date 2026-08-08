@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CineTix – Movie Ticketing</title>
+<link rel="stylesheet" href="assets/css/style.css?v=3" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <div id="splash" class="page active">
+    <div class="splash-logo">
+      <span class="splash-mark">🎬</span>
+      <span class="logo-text">CINETIX</span>
+    </div>
+    <div class="splash-tag">Nonton makin gampang, kursi kamu udah nunggu.</div>
+  </div>
+  <div id="login" class="page">
+    <div class="login-shell">
+      <div class="login-visual">
+        <div class="login-visual-inner">
+          <span class="logo-text login-visual-logo">CINETIX</span>
+          <p class="login-visual-copy">Pesan tiket bioskop favoritmu, pilih kursi terbaik, dan cetak tiketmu sendiri — semua dalam satu tempat.</p>
+          <div class="login-visual-strip">
+            <div class="strip-chip">🎟️ E-ticket instan</div>
+            <div class="strip-chip">🪑 Pilih kursi bebas</div>
+          </div>
+        </div>
+      </div>
+      <div class="login-form-panel">
+        <div class="login-header">
+          <p class="login-title">Masuk ke Akunmu</p>
+          <p class="login-sub">Lanjutkan untuk mulai memesan tiket</p>
+        </div>
+        <form class="login-form" id="loginForm">
+          <input type="email" class="input-field" id="emailInput" placeholder="Email" required />
+          <input type="password" class="input-field" placeholder="Password" required />
+          <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+        <div class="or-divider">atau masuk dengan</div>
+        <div class="social-btns single">
+          <div class="social-btn" data-provider="facebook" title="Facebook">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.06 5.66 21.2 10.44 21.95V14.9H7.9v-2.84h2.54v-2.17c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.84h2.78l-.44 2.84h-2.34v7.05C18.34 21.2 22 17.06 22 12.06z"/></svg>
+            <span>Masuk dengan Facebook</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <header id="topnav" class="topnav">
+    <div class="topnav-inner">
+      <div class="topnav-left">
+        <span class="topnav-back" id="topnavBack" title="Kembali">‹</span>
+        <span class="logo-text small nav-item" data-page="home" style="cursor:pointer;">CINETIX</span>
+        <nav class="topnav-links">
+          <span class="nav-item active" data-page="home">Beranda</span>
+          <span class="nav-item" data-page="tiket">Tiket Saya</span>
+        </nav>
+      </div>
+      <div class="topnav-mid">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari film / bioskop" />
+        </div>
+      </div>
+      <div class="topnav-right nav-item" data-page="akun">
+        <div class="topnav-avatar" id="topnavAvatar">👤</div>
+        <span class="topnav-username" id="topnavUsername">Pengguna</span>
+      </div>
+    </div>
+  </header>
+  <div id="home" class="page">
+    <div class="hero-banner">
+      <img src="assets/img/coba.jpeg" class="hero-banner-bg" alt="Film Unggulan" />
+      <div class="hero-banner-fade"></div>
+      <div class="hero-banner-content">
+        <div class="hero-badge">SEDANG TAYANG</div>
+        <h1 class="hero-title">CinLock – Love, Camera, Action!</h1>
+        <p class="hero-genre">Romance</p>
+        <button class="btn-primary hero-cta" data-nav="detail" data-movie="cinlock">🎬 Lihat Jadwal</button>
+      </div>
+    </div>
+    <div class="section container">
+      <div class="section-header">
+        <span class="section-title">Sedang Tayang</span>
+      </div>
+      <div class="cinema-filters">
+        <button class="filter-chip active" data-genre="semua">Semua Film</button>
+        <button class="filter-chip" data-genre="horror">Horror</button>
+        <button class="filter-chip" data-genre="action">Action</button>
+        <button class="filter-chip" data-genre="comedy">Comedy</button>
+        <button class="filter-chip" data-genre="romance">Romance</button>
+        <button class="filter-chip" data-genre="scifi">Sci-Fi</button>
+        <button class="filter-chip" data-genre="thriller">Thriller</button>
+        <button class="filter-chip" data-genre="drama">Drama</button>
+        <button class="filter-chip" data-genre="animation">Animation</button>
+      </div>
+      <div class="movies-grid" id="moviesGrid">
+        <div class="movie-card" data-nav="detail" data-movie="cinlock" data-genre="romance">
+          <img src="assets/img/cinlock1.jpeg" class="movie-poster" alt="CinLock"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">CinLock – Love, Camera, Action!</div>
+            <div class="movie-genre-card">Romance</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="pertaruhan" data-genre="action">
+          <img src="assets/img/pertaruhan1.jpeg" class="movie-poster" alt="Pertaruhan"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Pertaruhan – The Series</div>
+            <div class="movie-genre-card">Action</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="horor" data-genre="horror">
+          <img src="assets/img/rumah1.jpeg" class="movie-poster" alt="Rumah Kita"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Rumah Kita</div>
+            <div class="movie-genre-card">Horror</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="komedi" data-genre="comedy">
+          <img src="assets/img/pakrt1.jpeg" class="movie-poster" alt="Pak RT Naik Jabatan"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Pak RT Naik Jabatan</div>
+            <div class="movie-genre-card">Comedy</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="scifi" data-genre="scifi">
+          <img src="assets/img/nebula1.jpeg" class="movie-poster" alt="Nebula: Titik Balik"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Nebula: Titik Balik</div>
+            <div class="movie-genre-card">Sci-Fi</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="thriller" data-genre="thriller">
+          <img src="assets/img/jejak1.jpeg" class="movie-poster" alt="Jejak Terakhir"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Jejak Terakhir</div>
+            <div class="movie-genre-card">Thriller</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="drama" data-genre="drama">
+          <img src="assets/img/pulang1.jpeg" class="movie-poster" alt="Pulang ke Rumah" onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Pulang ke Rumah</div>
+            <div class="movie-genre-card">Drama</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+        <div class="movie-card" data-nav="detail" data-movie="animasi" data-genre="animation">
+          <img src="assets/img/kancil1.jpeg" class="movie-poster" alt="Kancil dan Rimba Ajaib"  onerror="App.handleImgError(this)" />
+          <div class="movie-overlay">
+            <div class="movie-title-card">Kancil dan Rimba Ajaib</div>
+            <div class="movie-genre-card">Animation</div>
+          </div>
+          <div class="movie-tag">TAYANG</div>
+        </div>
+      </div>
+      <div class="empty-state" id="noResults" style="display:none;">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">Film Tidak Ditemukan</div>
+        <div class="empty-sub">Coba kata kunci lain atau ganti filter genre.</div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/cinlock1.jpeg" class="detail-poster" alt="CinLock"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">CinLock – Love, Camera, Action!</div>
+            <div class="detail-genre">Romance</div>
+            <div class="detail-stars">★★★★★</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-cinlock">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-cinlock">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-cinlock" class="tab-content active">
+            <p class="synopsis-text">
+              Seorang mahasiswi film berbakat tapi ketus dan gemar menilai orang dengan angka, membuat dia terancam kehilangan segalanya termasuk sahabat, cinta, bahkan mimpinya sebagai produser film.
+            </p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/angga.jpg" class="cast-avatar" alt="Angga Yunanda" /><div class="cast-name">Angga Yunanda</div></div>
+                <div class="cast-card"><img src="assets/img/syifa.jpeg" class="cast-avatar" alt="Syifa Hadju" /><div class="cast-name">Syifa Hadju</div></div>
+                <div class="cast-card"><img src="assets/img/jefri.jpg" class="cast-avatar" alt="Jefri Nichol" /><div class="cast-name">Jefri Nichol</div></div>
+                <div class="cast-card"><img src="assets/img/tissa.jpeg" class="cast-avatar" alt="Tissa Biani" /><div class="cast-name">Tissa Biani</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-cinlock" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">12:05</button><button class="time-slot">14:15</button><button class="time-slot">18:30</button><button class="time-slot">20:20</button>
+                </div>
+              </div>   
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 46.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">10:30</button><button class="time-slot">13:30</button><button class="time-slot">16:30</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 52.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">11:00</button><button class="time-slot">14:00</button><button class="time-slot">17:00</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="cinlock">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-pertaruhan" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/pertaruhan1.jpeg" class="detail-poster" alt="Pertaruhan"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Pertaruhan – The Series</div>
+            <div class="detail-genre">Action</div>
+            <div class="detail-stars">★★★★☆</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-p">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-p">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-p" class="tab-content active">
+            <p class="synopsis-text">
+              Empat orang dengan latar belakang berbeda terpaksa bersatu dalam sebuah misi berbahaya. Di tengah pengkhianatan, mereka harus mempertaruhkan segalanya — nyawa, keluarga, dan kepercayaan.
+            </p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/reza.jpg" class="cast-avatar" alt="Reza Rahadian" /><div class="cast-name">Reza Rahadian</div></div>
+                <div class="cast-card"><img src="assets/img/adipati.jpg" class="cast-avatar" alt="Adipati Dolken" /><div class="cast-name">Adipati Dolken</div></div>
+                <div class="cast-card"><img src="assets/img/amanda.jpeg" class="cast-avatar" alt="Amanda Manopo" /><div class="cast-name">Amanda Manopo</div></div>
+                <div class="cast-card"><img src="assets/img/vanesha.jpg" class="cast-avatar" alt="Vanesha Prescilla" /><div class="cast-name">Vanesha Prescilla</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-p" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 40.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">10:00</button><button class="time-slot">12:00</button><button class="time-slot">15:00</button><button class="time-slot">19:00</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">SATIN 2D</span><span class="show-type-price">Rp. 45.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">11:00</button><button class="time-slot">14:00</button><button class="time-slot">17:00</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 45.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">12:00</button><button class="time-slot">15:00</button><button class="time-slot">18:00</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="pertaruhan">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-horor" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/rumah1.jpeg" class="detail-poster" alt="Rumah Kita"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Rumah Kita</div>
+            <div class="detail-genre">Horror</div>
+            <div class="detail-stars">★★★★☆</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-horor">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-horor">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-horor" class="tab-content active">
+            <p class="synopsis-text">Sebuah keluarga muda pindah ke rumah warisan di pinggiran kota. Malam pertama, suara-suara aneh mulai terdengar. Semakin dalam mereka menyelidiki, semakin gelap rahasia yang tersimpan di balik dinding rumah itu.</p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/luna.jpg" class="cast-avatar" alt="Luna Maya" /><div class="cast-name">Luna Maya</div></div>
+                <div class="cast-card"><img src="assets/img/reza.jpg" class="cast-avatar" alt="Reza Rahadian" /><div class="cast-name">Reza Rahadian</div></div>
+                <div class="cast-card"><img src="assets/img/pevita.jpg" class="cast-avatar" alt="Pevita Pearce" /><div class="cast-name">Pevita Pearce</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-horor" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:30</button><button class="time-slot">17:00</button><button class="time-slot">20:30</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 45.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">14:40</button><button class="time-slot">16:35</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 44.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">16:45</button><button class="time-slot">20:15</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="horor">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-komedi" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/pakrt1.jpeg" class="detail-poster" alt="Pak RT Naik Jabatan"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Pak RT Naik Jabatan</div>
+            <div class="detail-genre">Comedy</div>
+            <div class="detail-stars">★★★★★</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-komedi">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-komedi">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-komedi" class="tab-content active">
+            <p class="synopsis-text">Pak Slamet, ketua RT yang dikenal cerewet dan sok kuasa, tiba-tiba ditunjuk sebagai calon walikota oleh partai kecil yang salah kirim surat. Kekacauan pun terjadi saat Pak Slamet mulai kampanye dengan cara-cara khasnya.</p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/sule.png" class="cast-avatar" alt="Sule" /><div class="cast-name">Sule</div></div>
+                <div class="cast-card"><img src="assets/img/luna.jpg" class="cast-avatar" alt="Luna Maya" /><div class="cast-name">Luna Maya</div></div>
+                <div class="cast-card"><img src="assets/img/kiky.jpg" class="cast-avatar" alt="Kiky Saputri" /><div class="cast-name">Kiky Saputri</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-komedi" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:10</button><button class="time-slot">13:00</button><button class="time-slot">16:50</button><button class="time-slot">18:40</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 36.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">14:30</button><button class="time-slot">16:45</button><button class="time-slot">19:00</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 46.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">12:30</button><button class="time-slot">15:00</button><button class="time-slot">17:30</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="komedi">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-scifi" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/nebula1.jpeg" class="detail-poster" alt="Nebula: Titik Balik"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Nebula: Titik Balik</div>
+            <div class="detail-genre">Sci-Fi</div>
+            <div class="detail-stars">★★★★☆</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-scifi">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-scifi">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-scifi" class="tab-content active">
+            <p class="synopsis-text">Tahun 2147, seorang insinyur pesawat menemukan sinyal misterius dari luar angkasa yang ternyata adalah pesan dari masa depan. Ia harus memutuskan apakah akan mengubah garis waktu demi menyelamatkan Bumi.</p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/adipati.jpg" class="cast-avatar" alt="Adipati Dolken" /><div class="cast-name">Adipati Dolken</div></div>
+                <div class="cast-card"><img src="assets/img/dian.png" class="cast-avatar" alt="Dian Sastrowardoyo" /><div class="cast-name">Dian Sastrowardoyo</div></div>
+                <div class="cast-card"><img src="assets/img/joe.jpg" class="cast-avatar" alt="Joe Taslim" /><div class="cast-name">Joe Taslim</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-scifi" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:45</button><button class="time-slot">16:00</button><button class="time-slot">19:30</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 36.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">14:30</button><button class="time-slot">16:45</button><button class="time-slot">19:30</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 44.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">12:30</button><button class="time-slot">20:00</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="scifi">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-thriller" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/jejak1.jpeg" class="detail-poster" alt="Jejak Terakhir"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Jejak Terakhir</div>
+            <div class="detail-genre">Thriller</div>
+            <div class="detail-stars">★★★★☆</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-thriller">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-thriller">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-thriller" class="tab-content active">
+            <p class="synopsis-text">Seorang detektif ditugaskan menyelidiki kasus penculikan yang ternyata berhubungan langsung dengan masa lalunya sendiri. Setiap petunjuk membawanya semakin dekat pada kebenaran yang selama ini disembunyikan.</p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/iko.jpg" class="cast-avatar" alt="Iko Uwais" /><div class="cast-name">Iko Uwais</div></div>
+                <div class="cast-card"><img src="assets/img/joe.jpg" class="cast-avatar" alt="Joe Taslim" /><div class="cast-name">Joe Taslim</div></div>
+                <div class="cast-card"><img src="assets/img/prisia.jpg" class="cast-avatar" alt="Prisia Nasution" /><div class="cast-name">Prisillia Nasution</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-thriller" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">15:55</button><button class="time-slot">19:05</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">SATIN 2D</span><span class="show-type-price">Rp. 36.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:50</button><button class="time-slot">17:10</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 46.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">16:35</button><button class="time-slot">20:00</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="thriller">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-drama" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/pulang1.jpeg" class="detail-poster" alt="Pulang ke Rumah"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Pulang ke Rumah</div>
+            <div class="detail-genre">Drama</div>
+            <div class="detail-stars">★★★★★</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-drama">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-drama">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-drama" class="tab-content active">
+            <p class="synopsis-text">Setelah 15 tahun merantau, seorang anak kembali ke kampung halamannya untuk merawat ayahnya yang sakit keras. Ia harus berdamai dengan masa lalu yang selama ini ia hindari.</p>
+            <div class="cast-section">
+              <div class="cast-title">Pemeran</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/slamet.jpg" class="cast-avatar" alt="Slamet Rahardjo" /><div class="cast-name">Slamet Rahardjo</div></div>
+                <div class="cast-card"><img src="assets/img/iqbaal.jpeg" class="cast-avatar" alt="Iqbaal Ramadhan" /><div class="cast-name">Iqbal Ramadhan</div></div>
+                <div class="cast-card"><img src="assets/img/angga.jpg" class="cast-avatar" alt="Angga Yunanda" /><div class="cast-name">Angga Yunanda</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-drama" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:00</button><button class="time-slot">15:30</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">SATIN 2D</span><span class="show-type-price">Rp. 45.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">14:00</button><button class="time-slot">17:00</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 46.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:30</button><button class="time-slot">16:30</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="drama">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="movie-detail-animasi" class="page">
+    <div class="detail-shell container">
+      <div class="detail-layout">
+        <img src="assets/img/kancil1.jpeg" class="detail-poster" alt="Kancil dan Rimba Ajaib"  onerror="App.handleImgError(this)" />
+        <div class="detail-main">
+          <div class="detail-meta">
+            <div class="detail-title">Kancil dan Rimba Ajaib</div>
+            <div class="detail-genre">Animation</div>
+            <div class="detail-stars">★★★★★</div>
+          </div>
+          <div class="detail-tabs">
+            <button class="tab-btn active" data-tab="sinopsis-animasi">SINOPSIS</button>
+            <button class="tab-btn" data-tab="jadwal-animasi">JADWAL</button>
+          </div>
+          <div id="tab-sinopsis-animasi" class="tab-content active">
+            <p class="synopsis-text">Kancil yang cerdik memimpin sekumpulan hewan hutan untuk menyelamatkan rimba mereka dari ancaman penebangan liar. Sebuah petualangan penuh warna dan pesan tentang persahabatan serta menjaga alam.</p>
+            <div class="cast-section">
+              <div class="cast-title">Pengisi Suara</div>
+              <div class="cast-scroll">
+                <div class="cast-card"><img src="assets/img/iqbaal.jpeg" class="cast-avatar" alt="Iqbaal Ramadhan" /><div class="cast-name">Iqbal Ramadhan</div></div>
+                <div class="cast-card"><img src="assets/img/marsha.jpeg" class="cast-avatar" alt="Marsha Timothy" /><div class="cast-name">Marsha Timothy</div></div>
+                <div class="cast-card"><img src="assets/img/reza.jpg" class="cast-avatar" alt="Reza Rahadian" /><div class="cast-name">Reza Rahadian</div></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-jadwal-animasi" class="tab-content">
+            <div class="date-scroll">
+              <div class="date-chip" data-date="1"><div class="date-num">24 Agustus</div><div class="date-day">Senin</div></div>
+              <div class="date-chip" data-date="2"><div class="date-num">25 Agustus</div><div class="date-day">Selasa</div></div>
+              <div class="date-chip active" data-date="3"><div class="date-num">26 Agustus</div><div class="date-day">Rabu</div></div>
+              <div class="date-chip" data-date="4"><div class="date-num">27 Agustus</div><div class="date-day">Kamis</div></div>
+              <div class="date-chip" data-date="5"><div class="date-num">28 Agustus</div><div class="date-day">Jumat</div></div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">XXI ARAYA MALANG</div><div class="cinema-addr">Araya Malang</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">2D</span><span class="show-type-price">Rp. 35.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">13:30</button><button class="time-slot">15:25</button><button class="time-slot">17:30</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CGV MALANG CITY POINT</div><div class="cinema-addr">Malang City Point</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 36.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">15:00</button><button class="time-slot">18:00</button>
+                </div>
+              </div>
+            </div>
+            <div class="cinema-block">
+              <div class="cinema-name-row"><span class="cinema-icon">🎬</span>
+                <div><div class="cinema-name">CINEPOLIS MALANG TOWN SQUARE</div><div class="cinema-addr">Malang Town Square</div></div>
+              </div>
+              <div class="show-type">
+                <span class="show-type-label">REGULAR 2D</span><span class="show-type-price">Rp. 44.000</span>
+                <div class="time-slots">
+                  <button class="time-slot">14:30</button><button class="time-slot">16:30</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary btn-beli" data-movie="animasi">🎫 BELI TIKET</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="seat-select" class="page">
+    <div class="seat-shell container">
+      <div class="seat-header">
+        <div class="back-btn" data-back="movie-detail">‹</div>
+        <h2>Pilih Kursi</h2>
+      </div>
+      <div class="seat-layout">
+        <div class="seat-main">
+          <div class="screen-label">Screen</div>
+          <div class="screen-bar"></div>
+          <div class="seat-legend">
+            <div class="legend-item"><div class="legend-dot available"></div>Available</div>
+            <div class="legend-item"><div class="legend-dot booked"></div>Booked</div>
+            <div class="legend-item"><div class="legend-dot selected"></div>Selected</div>
+          </div>
+          <div class="seat-grid" id="seatGrid"></div>
+        </div>
+        <aside class="seat-summary-panel">
+          <div class="summary-panel-title">Ringkasan</div>
+          <div class="seat-count-info">
+            <div class="count" id="seatCountLabel">0 Kursi</div>
+            <div class="price" id="seatPriceLabel">Pilih kursi</div>
+          </div>
+          <div class="seat-chosen-list" id="seatChosenList"></div>
+          <button class="btn-book" id="confirmSeats" disabled>BELI TIKET</button>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <div id="order-summary" class="page">
+    <div class="summary-shell container">
+      <div class="summary-header">
+        <div class="back-btn" data-back="seat-select">‹</div>
+        <h2>Ringkasan Pemesanan</h2>
+      </div>
+      <div class="summary-layout">
+        <div class="summary-left">
+          <div class="summary-movie-card">
+            <img src="assets/img/cinlock1.jpeg" class="summary-poster" id="summaryPoster" alt="Film" onerror="App.handleImgError(this)" />
+            <div class="summary-movie-info">
+              <div class="summary-movie-title" id="summaryMovieTitle">CinLock – Love, Camera, Action!</div>
+              <div class="summary-cinema" id="summaryCinemaName">Bioskop CineTix Malang</div>
+              <div class="summary-time" id="summaryDateTime">Rabu, 26 Agustus 2026, 14:00</div>
+            </div>
+          </div>
+        </div>
+        <div class="summary-right">
+          <div class="detail-transaksi">
+            <h3>Detail Transaksi</h3>
+            <div class="detail-row"><span class="label" id="summaryCount">2 Tiket</span><span class="value" id="summarySeats">A1, A2</span></div>
+            <div class="detail-row"><span class="label">KURSI REGULER</span><span class="value" id="summarySubtotal">Rp. 50.000 x2</span></div>
+            <div class="detail-row"><span class="label">BIAYA LAYANAN</span><span class="value" id="summaryService">Rp. 4.000</span></div>
+            <div class="total-row"><span class="label">Total Bayar</span><span class="value" id="summaryTotal">Rp. 104.000</span></div>
+            <button class="btn-pay" id="bayarBtn">BAYAR SEKARANG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="payment" class="page">
+    <div class="payment-card">
+      <div class="logo-text small" style="margin-bottom:4px;">CINETIX</div>
+      <div class="payment-title">Scan QR Code di bawah ini</div>
+      <div class="qr-container">
+        <canvas id="qrCanvas" class="qr-code"></canvas>
+        <div class="qr-caption">CineTix Payment</div>
+      </div>
+      <div class="payment-countdown" id="payCountdown">02:00</div>
+      <div class="payment-note">Pembayaran akan otomatis terverifikasi setelah scan QR code di atas</div>
+      <div class="payment-simulate">Mensimulasikan pembayaran...</div>
+    </div>
+  </div>
+  <div id="success" class="page">
+    <div class="success-card">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Pembayaran Berhasil</div>
+      <div class="success-sub">Tiketmu sudah siap! Unduh atau lihat e-tiket ini di menu Tiket Saya.</div>
+      <div class="ticket-card" id="ticketCardPrint">
+        <div class="ticket-card-brand">CINETIX <span>E-TICKET</span></div>
+        <div class="ticket-row"><span class="tk-label">Pemesan</span><span class="tk-val" id="ticketBooker">–</span></div>
+        <div class="ticket-row"><span class="tk-label">Film</span><span class="tk-val" id="ticketMovie">CinLock</span></div>
+        <div class="ticket-row"><span class="tk-label">Bioskop</span><span class="tk-val" id="ticketCinema">–</span></div>
+        <div class="ticket-row"><span class="tk-label">Jadwal</span><span class="tk-val" id="ticketDateTime">–</span></div>
+        <div class="ticket-row"><span class="tk-label">Kursi</span><span class="tk-val" id="ticketSeats">–</span></div>
+        <hr class="divider-dashed" />
+        <div class="ticket-row"><span class="tk-label">Total</span><span class="tk-val" id="ticketTotal">–</span></div>
+      </div>
+      <div class="success-actions">
+        <button class="btn-primary" id="downloadPdfBtn">⬇️ Unduh Tiket (PDF)</button>
+        <button class="btn-home" onclick="App.navigate('home')">Kembali ke Beranda</button>
+      </div>
+    </div>
+  </div>
+  <div id="page-tiket" class="page">
+    <div class="container">
+      <div class="page-header">🎫 Tiket Saya</div>
+      <div id="tiketContent"></div>
+    </div>
+  </div>
+  <div id="ticket-detail" class="page">
+    <div class="detail-shell container">
+      <div class="success-card" style="margin:0 auto;">
+        <div class="ticket-card" id="ticketDetailCard">
+          <div class="ticket-card-brand">CINETIX <span>E-TICKET</span></div>
+          <div class="ticket-row"><span class="tk-label">Pemesan</span><span class="tk-val" id="tdBooker">–</span></div>
+          <div class="ticket-row"><span class="tk-label">Film</span><span class="tk-val" id="tdMovie">–</span></div>
+          <div class="ticket-row"><span class="tk-label">Bioskop</span><span class="tk-val" id="tdCinema">–</span></div>
+          <div class="ticket-row"><span class="tk-label">Jadwal</span><span class="tk-val" id="tdDateTime">–</span></div>
+          <div class="ticket-row"><span class="tk-label">Kursi</span><span class="tk-val" id="tdSeats">–</span></div>
+          <hr class="divider-dashed" />
+          <div class="ticket-row"><span class="tk-label">Total</span><span class="tk-val" id="tdTotal">–</span></div>
+        </div>
+        <div class="qr-container" style="margin-top:20px;">
+          <canvas id="tdQrCanvas" class="qr-code"></canvas>
+          <div class="qr-caption">Tunjukkan kode ini di bioskop</div>
+        </div>
+        <div class="success-actions" style="margin-top:20px;">
+          <button class="btn-primary" id="tdDownloadPdfBtn">⬇️ Unduh Tiket (PDF)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="page-akun" class="page">
+    <div class="container akun-container">
+      <div class="akun-card">
+        <div class="akun-avatar-wrap" id="akunAvatar">👤</div>
+        <div class="akun-name" id="akunName">Pengguna</div>
+        <div class="akun-email" id="akunEmail">–</div>
+        <div class="akun-provider" id="akunProvider">
+          <span id="akunProviderIcon">👤</span>
+          <span id="akunProviderText">Guest</span>
+        </div>
+      </div>
+      <div class="akun-menu">
+        <div class="akun-menu-item" data-menu="tiket">
+          <span class="akun-menu-icon">🎫</span>
+          <span class="akun-menu-text">Riwayat Tiket</span>
+          <span class="akun-menu-arrow">›</span>
+        </div>
+        <div class="akun-menu-item" data-menu="notif">
+          <span class="akun-menu-icon">🔔</span>
+          <span class="akun-menu-text">Notifikasi</span>
+          <span class="akun-menu-arrow">›</span>
+        </div>
+        <div class="akun-menu-item" data-menu="setting">
+          <span class="akun-menu-icon">⚙️</span>
+          <span class="akun-menu-text">Pengaturan</span>
+          <span class="akun-menu-arrow">›</span>
+        </div>
+        <div class="akun-menu-item akun-logout" id="logoutBtn">
+          <span class="akun-menu-icon">🚪</span>
+          <span class="akun-menu-text">Keluar</span>
+          <span class="akun-menu-arrow">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal login Facebook custom (menggantikan window.prompt bawaan browser) -->
+<div id="fbLoginOverlay" class="fb-modal-overlay">
+  <div class="fb-modal-box">
+    <button class="fb-modal-close" id="fbModalClose" title="Tutup">✕</button>
+    <div class="fb-modal-icon">
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="#ffffff"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.06 5.66 21.2 10.44 21.95V14.9H7.9v-2.84h2.54v-2.17c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.84h2.78l-.44 2.84h-2.34v7.05C18.34 21.2 22 17.06 22 12.06z"/></svg>
+    </div>
+    <div class="fb-modal-title">Masuk dengan Facebook</div>
+    <div class="fb-modal-sub">Masukkan nama akun Facebook kamu untuk melanjutkan</div>
+    <input type="text" id="fbNameInput" class="input-field fb-modal-input" placeholder="Nama akun Facebook" autocomplete="off" />
+    <div class="fb-modal-actions">
+      <button class="fb-btn-cancel" id="fbModalCancel">Batal</button>
+      <button class="fb-btn-confirm" id="fbModalConfirm">Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/script.js?v=3"></script>
+</body>
+</html>
