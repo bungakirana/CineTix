@@ -48,10 +48,6 @@ const App = {
     drama:      'Pulang ke Rumah',
     animasi:    'Kancil dan Rimba Ajaib',
   },
-  // FIX #1 (poster tidak muncul): nama file di sini sebelumnya tidak sama
-  // dengan file poster asli yang dipakai di index.html (movie-card &
-  // detail-poster), sehingga hanya CinLock & Pertaruhan yang kebetulan
-  // cocok, 6 film lainnya 404. Disamakan persis dengan <img> di index.html.
   moviePosters: {
     cinlock:    'assets/img/cinlock1.jpeg',
     pertaruhan: 'assets/img/pertaruhan1.jpeg',
@@ -97,6 +93,64 @@ const App = {
   handleImgError(img) {
     img.onerror = null; // prevent infinite loop if placeholder also fails
     img.src = this.PLACEHOLDER_POSTER;
+  },
+
+  // ===== MODAL CUSTOM (pengganti alert() & confirm() bawaan browser) =====
+  // Sebelumnya semua pesan (login gagal, register gagal, kursi kosong,
+  // dll) pakai alert() bawaan JS, jadi muncul sebagai kotak putih polos
+  // "localhost says" dari Chrome, bukan gaya gelap-merah CineTix.
+  //
+  // showModal(message, opts):
+  //   opts.icon      -> emoji ikon (default '⚠️')
+  //   opts.onOk       -> callback saat tombol OK ditekan
+  //   opts.confirm    -> true untuk tampilkan tombol "Batal" juga (mode confirm)
+  //   opts.onCancel   -> callback saat tombol Batal ditekan (mode confirm)
+  //   opts.okText     -> ubah label tombol OK (default "OK")
+  showModal(message, opts = {}) {
+    const overlay = document.getElementById('ctModalOverlay');
+    const msgEl = document.getElementById('ctModalMsg');
+    const iconEl = document.getElementById('ctModalIcon');
+    const okBtn = document.getElementById('ctModalOkBtn');
+    const cancelBtn = document.getElementById('ctModalCancelBtn');
+
+    if (!overlay || !msgEl || !okBtn) {
+      // Fallback super aman kalau markup modal belum ada di halaman
+      if (opts.confirm) {
+        if (confirm(message) && typeof opts.onOk === 'function') opts.onOk();
+      } else {
+        alert(message);
+        if (typeof opts.onOk === 'function') opts.onOk();
+      }
+      return;
+    }
+
+    msgEl.textContent = message;
+    iconEl.textContent = opts.icon || '⚠️';
+    okBtn.textContent = opts.okText || 'OK';
+
+    // Bersihkan listener lama supaya tidak menumpuk tiap kali showModal dipanggil
+    const newOkBtn = okBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+    const closeModal = () => overlay.classList.remove('show');
+
+    newOkBtn.addEventListener('click', () => {
+      closeModal();
+      if (typeof opts.onOk === 'function') opts.onOk();
+    });
+
+    if (opts.confirm) {
+      cancelBtn.style.display = 'block';
+      const newCancelBtn = cancelBtn.cloneNode(true);
+      cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+      newCancelBtn.addEventListener('click', () => {
+        closeModal();
+        if (typeof opts.onCancel === 'function') opts.onCancel();
+      });
+    } else {
+      cancelBtn.style.display = 'none';
+    }
+
+    overlay.classList.add('show');
   },
 
   navigate(pageId, opts = {}) {
@@ -150,27 +204,98 @@ const App = {
     // Splash → Login after 2.2s
     setTimeout(() => this.navigate('login'), 2200);
 
-    // Login form (email/password)
+    // Login form (email/password) — sekarang beneran cek/simpan ke
+    // database lewat api/login.php (bukan cuma disimpan di variabel
+    // JS doang seperti sebelumnya, yang hilang tiap refresh halaman).
+    // enterApp() HANYA dipanggil kalau backend membalas success:true,
+    // jadi akun yang belum pernah daftar tidak akan bisa masuk.
     document.getElementById('loginForm').addEventListener('submit', e => {
       e.preventDefault();
-      const email = document.getElementById('emailInput').value;
-      const name = email.split('@')[0] || 'Pengguna';
-      this.user = { name, email, provider: 'email' };
-      this.enterApp();
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Memproses...'; }
+
+      fetch('api/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.user = { name: data.name, email: data.email, provider: 'email' };
+            this.enterApp();
+          } else {
+            this.showModal(data.message || 'Email/password salah atau belum terdaftar. Silakan daftar dulu.', { icon: '⚠️' });
+          }
+        })
+        .catch(err => {
+          console.error('Gagal login:', err);
+          this.showModal('Tidak bisa terhubung ke server. Pastikan XAMPP (Apache & MySQL) menyala.', { icon: '🔌' });
+        })
+        .finally(() => {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Sign In'; }
+        });
     });
 
-    // Social login buttons (Facebook only — buka modal custom untuk
-    // menanyakan nama akun, menggantikan window.prompt() bawaan browser)
-    document.querySelectorAll('.social-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const provider = btn.dataset.provider || 'facebook';
-        if (provider === 'facebook') {
-          this.openFacebookModal();
-        }
+    // Form Daftar (register) — menggantikan login Facebook yang lama
+    // (yang tidak pernah benar-benar tersimpan ke database). Fetch ke
+    // api/register.php, kalau sukses langsung auto-login.
+    document.getElementById('registerForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('registerName').value.trim();
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Memproses...'; }
+
+      fetch('api/register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.user = { name: data.name, email: data.email, provider: 'email' };
+            this.enterApp();
+          } else {
+            this.showModal(data.message || 'Pendaftaran gagal, coba lagi.', { icon: '⚠️' });
+          }
+        })
+        .catch(err => {
+          console.error('Gagal daftar:', err);
+          this.showModal('Tidak bisa terhubung ke server. Pastikan XAMPP (Apache & MySQL) menyala.', { icon: '🔌' });
+        })
+        .finally(() => {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Daftar'; }
+        });
+    });
+
+    // Toggle tampilan antara form Login <-> form Daftar (tanpa pindah
+    // halaman, cukup sembunyikan/tampilkan salah satu wrapper).
+    const loginFormWrap = document.getElementById('loginFormWrap');
+    const registerFormWrap = document.getElementById('registerFormWrap');
+    const showRegisterLink = document.getElementById('showRegisterLink');
+    const showLoginLink = document.getElementById('showLoginLink');
+
+    if (showRegisterLink) {
+      showRegisterLink.addEventListener('click', e => {
+        e.preventDefault();
+        loginFormWrap.style.display = 'none';
+        registerFormWrap.style.display = 'block';
       });
-    });
-
-    this.initFacebookModal();
+    }
+    if (showLoginLink) {
+      showLoginLink.addEventListener('click', e => {
+        e.preventDefault();
+        registerFormWrap.style.display = 'none';
+        loginFormWrap.style.display = 'block';
+      });
+    }
 
     // Topnav back button (next to the CINETIX logo)
     const topnavBackBtn = document.getElementById('topnavBack');
@@ -196,15 +321,6 @@ const App = {
         this.selectedTime = '';
         this.selectedCinemaName = '';
         this.selectedCinemaAddr = '';
-        // FIX (tanggal tidak sesuai): sebelumnya this.selectedDate TIDAK
-        // direset saat pindah ke film lain. Kalau user sebelumnya sempat
-        // memilih tanggal lain (mis. 28 Agustus) di film A, lalu pindah ke
-        // film B tanpa mengklik date-chip di film B, this.selectedDate
-        // masih membawa nilai lama dari film A — padahal secara visual
-        // date-chip default film B ("Rabu", data-date="3") yang aktif.
-        // Akibatnya tanggal di Ringkasan Pemesanan / tiket bisa tidak
-        // sesuai dengan yang terlihat dipilih user. Reset ke default (3)
-        // di sini supaya selalu sinkron dengan date-chip aktif bawaan.
         this.selectedDate = 3;
         this.goToMovieDetail(movie);
       });
@@ -309,16 +425,23 @@ const App = {
 
     // Seat selection → order summary
     document.getElementById('confirmSeats').addEventListener('click', () => {
-      if (this.selectedSeats.length === 0) { alert('Pilih kursi terlebih dahulu!'); return; }
+      if (this.selectedSeats.length === 0) { this.showModal('Pilih kursi terlebih dahulu!', { icon: '🪑' }); return; }
       this.renderOrderSummary();
       this.navigate('order-summary');
     });
 
-    // Pay now → payment QR
+    // Pay now → payment QR page
     document.getElementById('bayarBtn').addEventListener('click', () => {
       this.navigate('payment');
-      this.startPaymentTimer();
+      this.showPaymentQr();
     });
+
+    // Tombol "Sudah Saya Bayar" — user yang mengonfirmasi sendiri, tidak
+    // ada lagi countdown/timer otomatis.
+    const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+    if (confirmPaymentBtn) {
+      confirmPaymentBtn.addEventListener('click', () => this.confirmPayment());
+    }
 
     // Download PDF ticket (from success page)
     document.getElementById('downloadPdfBtn').addEventListener('click', () => this.downloadTicketPdf(this._lastTicket));
@@ -326,6 +449,22 @@ const App = {
     // Download PDF ticket (from ticket detail / riwayat page)
     document.getElementById('tdDownloadPdfBtn').addEventListener('click', () => {
       this.downloadTicketPdf(this.bookedTickets[this._activeTicketIndex]);
+    });
+
+    // Kirim tiket via WhatsApp (dari success page)
+    document.getElementById('shareWaBtn').addEventListener('click', () => this.shareTicketWhatsApp(this._lastTicket));
+
+    // Kirim tiket via Email (dari success page)
+    document.getElementById('shareEmailBtn').addEventListener('click', () => this.shareTicketEmail(this._lastTicket));
+
+    // Kirim tiket via WhatsApp (dari ticket detail / riwayat page)
+    document.getElementById('tdShareWaBtn').addEventListener('click', () => {
+      this.shareTicketWhatsApp(this.bookedTickets[this._activeTicketIndex]);
+    });
+
+    // Kirim tiket via Email (dari ticket detail / riwayat page)
+    document.getElementById('tdShareEmailBtn').addEventListener('click', () => {
+      this.shareTicketEmail(this.bookedTickets[this._activeTicketIndex]);
     });
 
     // Generic back buttons (exclude seat-select's which is handled above)
@@ -350,15 +489,22 @@ const App = {
       });
     });
 
-    // Logout
+    // Logout — sebelumnya pakai confirm() bawaan browser ("Yakin mau
+    // keluar?"), sekarang pakai modal custom mode confirm (ada tombol
+    // OK & Batal) supaya tetap konsisten dengan tema gelap-merah CineTix.
     document.getElementById('logoutBtn').addEventListener('click', () => {
-      if (confirm('Yakin mau keluar?')) {
-        this.user = { name: 'Pengguna', email: '', provider: 'guest' };
-        this.bookedTickets = [];
-        this.pageHistory = [];
-        document.querySelector('.app-shell').classList.remove('logged-in');
-        this.navigate('login');
-      }
+      this.showModal('Yakin mau keluar dari akunmu?', {
+        icon: '🚪',
+        confirm: true,
+        okText: 'Ya, Keluar',
+        onOk: () => {
+          this.user = { name: 'Pengguna', email: '', provider: 'guest' };
+          this.bookedTickets = [];
+          this.pageHistory = [];
+          document.querySelector('.app-shell').classList.remove('logged-in');
+          this.navigate('login');
+        },
+      });
     });
 
     // Akun menu items
@@ -366,7 +512,7 @@ const App = {
       item.addEventListener('click', () => {
         const menu = item.dataset.menu;
         if (menu === 'tiket') { this.renderTiketPage(); this.navigate('page-tiket'); }
-        else { alert(`${item.querySelector('.akun-menu-text').textContent} — segera hadir!`); }
+        else { this.showModal(`${item.querySelector('.akun-menu-text').textContent} — segera hadir!`, { icon: 'ℹ️' }); }
       });
     });
 
@@ -395,69 +541,6 @@ const App = {
     // lalu perbarui setiap menit supaya selalu akurat mengikuti jam laptop.
     this.updatePastTimeSlots();
     setInterval(() => this.updatePastTimeSlots(), 60 * 1000);
-  },
-
-  // ===== MODAL LOGIN FACEBOOK =====
-  // Menggantikan window.prompt() bawaan browser (yang muncul sebagai kotak
-  // dialog polos bertuliskan "localhost says") dengan modal custom
-  // bertema CineTix: ikon Facebook, judul, input nama akun, dan tombol
-  // Batal / Lanjutkan. Modal disembunyikan/tampilkan lewat class "active"
-  // supaya ada transisi fade + scale yang halus (lihat style.css).
-  initFacebookModal() {
-    const overlay = document.getElementById('fbLoginOverlay');
-    const input = document.getElementById('fbNameInput');
-    const closeBtn = document.getElementById('fbModalClose');
-    const cancelBtn = document.getElementById('fbModalCancel');
-    const confirmBtn = document.getElementById('fbModalConfirm');
-    if (!overlay || !input || !confirmBtn) return;
-
-    const confirm = () => {
-      const name = input.value.trim();
-      if (!name) {
-        input.focus();
-        input.style.borderColor = 'var(--red)';
-        return;
-      }
-      this.user = { name, email: '', provider: 'facebook' };
-      this.closeFacebookModal();
-      this.enterApp();
-    };
-
-    confirmBtn.addEventListener('click', confirm);
-    closeBtn.addEventListener('click', () => this.closeFacebookModal());
-    cancelBtn.addEventListener('click', () => this.closeFacebookModal());
-
-    // Klik area gelap di luar kotak modal juga menutup modal
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) this.closeFacebookModal();
-    });
-
-    // Enter di input langsung lanjut, Esc menutup modal
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); confirm(); }
-    });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && overlay.classList.contains('active')) {
-        this.closeFacebookModal();
-      }
-    });
-
-    // Reset warna border saat user mulai mengetik lagi
-    input.addEventListener('input', () => { input.style.borderColor = ''; });
-  },
-
-  openFacebookModal() {
-    const overlay = document.getElementById('fbLoginOverlay');
-    const input = document.getElementById('fbNameInput');
-    if (!overlay) return;
-    if (input) { input.value = ''; input.style.borderColor = ''; }
-    overlay.classList.add('active');
-    setTimeout(() => input && input.focus(), 150);
-  },
-
-  closeFacebookModal() {
-    const overlay = document.getElementById('fbLoginOverlay');
-    if (overlay) overlay.classList.remove('active');
   },
 
   goToMovieDetail(movie) {
@@ -580,9 +663,8 @@ const App = {
   // ===== AKUN PAGE =====
   renderAkunPage() {
     const providerInfo = {
-      guest:    { icon: '👤', text: 'Masuk sebagai Tamu' },
-      email:    { icon: '✉️', text: 'Masuk dengan Email' },
-      facebook: { icon: 'f',  text: 'Masuk dengan Facebook' },
+      guest: { icon: '👤', text: 'Masuk sebagai Tamu' },
+      email: { icon: '✉️', text: 'Masuk dengan Email' },
     };
     const info = providerInfo[this.user.provider] || providerInfo['guest'];
     const initial = this.user.name.charAt(0).toUpperCase() || '👤';
@@ -638,7 +720,7 @@ const App = {
       el.classList.remove('selected');
       this.selectedSeats = this.selectedSeats.filter(s => s !== id);
     } else {
-      if (this.selectedSeats.length >= 6) { alert('Maksimal 6 kursi!'); return; }
+      if (this.selectedSeats.length >= 6) { this.showModal('Maksimal 6 kursi!', { icon: '🪑' }); return; }
       el.classList.add('selected');
       this.selectedSeats.push(id);
     }
@@ -663,11 +745,6 @@ const App = {
     const subtotal = count * this.ticketPrice;
     const total = subtotal + this.serviceFee;
     const seats = this.selectedSeats.join(', ');
-    // Array tanggal ini disamakan persis dengan date-chip di index.html
-    // (24-28 Agustus 2026). this.selectedDate (1-5) di-set dari
-    // dataset.date pada date-chip yang diklik, dan direset ke 3 setiap
-    // kali user membuka film baru (lihat listener [data-nav="detail"] di
-    // init()) supaya selalu sinkron dengan chip yang tampak aktif.
     const dates = ['24 Agustus','25 Agustus','26 Agustus','27 Agustus','28 Agustus'];
     const days = ['Senin','Selasa','Rabu','Kamis','Jumat'];
     const idx = this.selectedDate - 1;
@@ -694,27 +771,28 @@ const App = {
     }
   },
 
-  startPaymentTimer() {
-    let seconds = 120;
-    const el = document.getElementById('payCountdown');
-    const interval = setInterval(() => {
-      seconds--;
-      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-      const s = (seconds % 60).toString().padStart(2, '0');
-      if (el) el.textContent = m + ':' + s;
-      if (seconds <= 0) { clearInterval(interval); this.navigate('home'); }
-    }, 1000);
-
+  // Menampilkan QR pembayaran di halaman #payment. Tidak ada lagi
+  // countdown/timer otomatis — user sendiri yang menekan tombol
+  // "Sudah Saya Bayar" (lihat confirmPayment()) setelah selesai bayar
+  // lewat m-banking/e-wallet mereka.
+  showPaymentQr() {
     this.generateQR('qrCanvas', `PAY-${this.currentMovie}-${this.selectedSeats.join('')}`);
 
-    // Simulate payment success after 4 seconds
-    setTimeout(() => {
-      clearInterval(interval);
-      const ticket = this.saveBookedTicket();
-      this._lastTicket = ticket;
-      this.navigate('success');
-      this.renderSuccessTicket(ticket);
-    }, 4000);
+    const btn = document.getElementById('confirmPaymentBtn');
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Sudah Saya Bayar'; }
+  },
+
+  // Dipanggil saat user menekan tombol "Sudah Saya Bayar".
+  confirmPayment() {
+    const btn = document.getElementById('confirmPaymentBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
+
+    const ticket = this.saveBookedTicket();
+    this._lastTicket = ticket;
+    this.navigate('success');
+    this.renderSuccessTicket(ticket);
+
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Sudah Saya Bayar'; }
   },
 
   saveBookedTicket() {
@@ -835,9 +913,6 @@ const App = {
     setText('ticketTotal', 'Rp. ' + ticket.total.toLocaleString('id-ID'));
     setText('ticketDateTime', `${ticket.date}, ${ticket.time}`);
     setText('ticketCinema', ticket.cinema || 'Bioskop CineTix');
-    // Catatan: barcode/QR sengaja TIDAK ditampilkan di halaman "Pembayaran
-    // Berhasil" ini. Barcode tetap tersedia di PDF (downloadTicketPdf) dan
-    // di halaman "Tiket Saya" > detail tiket (lihat showTicketDetail / tdQrCanvas).
   },
 
   // Generates a simple barcode-style PNG (data URL) unique to the ticket, for embedding in the PDF
@@ -872,12 +947,12 @@ const App = {
   // ===== CETAK / UNDUH TIKET PDF (jsPDF) =====
   downloadTicketPdf(ticket) {
     if (!window.jspdf) {
-      alert('Library PDF belum siap dimuat, coba lagi sebentar.');
+      this.showModal('Library PDF belum siap dimuat, coba lagi sebentar.', { icon: '📄' });
       return;
     }
     ticket = ticket || this._lastTicket;
     if (!ticket) {
-      alert('Data tiket tidak ditemukan.');
+      this.showModal('Data tiket tidak ditemukan.', { icon: '📄' });
       return;
     }
 
@@ -953,6 +1028,57 @@ const App = {
 
     const fileName = `CineTix-Tiket-${ticket.movie}-${seats.replace(/,\s*/g, '').replace(/\s+/g, '') || 'ticket'}.pdf`;
     doc.save(fileName);
+  },
+
+  // Menyusun ringkasan tiket dalam bentuk teks polos, dipakai bareng oleh
+  // fitur kirim WhatsApp dan Email supaya isinya konsisten.
+  buildTicketSummaryText(ticket) {
+    const movie = this.movieTitles[ticket.movie] || ticket.movie;
+    const cinema = ticket.cinema || 'Bioskop CineTix';
+    const seats = ticket.seats || '-';
+    const total = ticket.total || 0;
+    const jadwal = `${ticket.date}, ${ticket.time}`;
+    const booker = this.user.name || 'Pengguna';
+
+    return [
+      'CINETIX E-TICKET',
+      '',
+      `Nama Pemesan : ${booker}`,
+      `Film         : ${movie}`,
+      `Bioskop      : ${cinema}`,
+      `Jadwal       : ${jadwal}`,
+      `Kursi        : ${seats}`,
+      `Total Bayar  : Rp. ${total.toLocaleString('id-ID')}`,
+      '',
+      'Tunjukkan e-tiket ini di bioskop untuk masuk studio.'
+    ].join('\n');
+  },
+
+  // ===== KIRIM TIKET VIA WHATSAPP =====
+  shareTicketWhatsApp(ticket) {
+    ticket = ticket || this._lastTicket;
+    if (!ticket) {
+      this.showModal('Data tiket tidak ditemukan.', { icon: '💬' });
+      return;
+    }
+    const text = this.buildTicketSummaryText(ticket);
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  },
+
+  // ===== KIRIM TIKET VIA EMAIL =====
+  shareTicketEmail(ticket) {
+    ticket = ticket || this._lastTicket;
+    if (!ticket) {
+      this.showModal('Data tiket tidak ditemukan.', { icon: '✉️' });
+      return;
+    }
+    const movie = this.movieTitles[ticket.movie] || ticket.movie;
+    const subject = `E-Tiket CineTix - ${movie}`;
+    const body = this.buildTicketSummaryText(ticket);
+    const to = this.user.email || '';
+    const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = url;
   }
 };
 
