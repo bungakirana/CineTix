@@ -18,8 +18,6 @@
   --border: #2C2C38;
   --radius: 12px;
   --container-w: 1180px;
-  --fb-blue: #1877F2;
-  --fb-blue-dark: #145DC4;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -137,23 +135,26 @@ html, body {
 .or-divider::before { left: 0; }
 .or-divider::after { right: 0; }
 
-.social-btns { display: flex; gap: 10px; }
-.social-btn {
-  flex: 1;
-  height: 50px;
-  background: linear-gradient(180deg, var(--fb-blue) 0%, var(--fb-blue-dark) 100%);
-  border: none;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  cursor: pointer; font-size: 15px; color: #fff;
-  transition: filter .2s, transform .1s, box-shadow .2s;
-  box-shadow: 0 6px 18px rgba(24,119,242,.28);
+/* ===== TOGGLE LOGIN <-> DAFTAR =====
+   Link "Belum punya akun? Daftar di sini" / "Sudah punya akun? Masuk
+   di sini" yang menggantikan tombol "Masuk dengan Facebook" lama.
+   Dibuat full-width + text-align:center supaya benar-benar di tengah
+   panel, dan margin-top diperbesar supaya berjarak jelas dari tombol
+   Sign In / Daftar di atasnya. */
+.auth-toggle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 36px;
+  font-size: 12.5px;
+  color: var(--gray);
 }
-.social-btn svg { flex-shrink: 0; }
-.social-btn span { font-size: 13.5px; font-weight: 700; letter-spacing: .2px; color: #fff; }
-.social-btn:hover { filter: brightness(1.08); box-shadow: 0 8px 22px rgba(24,119,242,.4); }
-.social-btn:active { transform: scale(.98); }
-.social-btns.single .social-btn { flex: none; width: 100%; }
+.auth-toggle a {
+  color: var(--red-light);
+  text-decoration: none;
+  font-weight: 700;
+}
+.auth-toggle a:hover { text-decoration: underline; }
 
 .login-footer { text-align: center; margin-top: 24px; color: var(--gray); font-size: 12.5px; }
 .login-footer a { color: var(--red-light); text-decoration: none; font-weight: 600; }
@@ -401,9 +402,14 @@ html, body {
 .qr-container { background: var(--white); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .qr-code { width: 200px; height: 200px; }
 .qr-caption { font-size: 12px; color: #555; font-family: 'Poppins', sans-serif; }
-.payment-note { font-size: 13px; color: var(--gray); text-align: center; line-height: 1.7; max-width: 300px; }
-.payment-countdown { font-size: 34px; font-weight: 800; color: var(--red); font-variant-numeric: tabular-nums; }
-.payment-simulate { font-size: 12px; color: var(--gray); }
+
+/* Catatan pembayaran: menggantikan countdown timer + teks "mensimulasikan
+   pembayaran" yang lama. Sekarang cuma info metode bayar, lalu user
+   mengonfirmasi sendiri lewat tombol "Sudah Saya Bayar" (lihat
+   #confirmPaymentBtn di bawah). */
+.payment-note { font-size: 13.5px; color: var(--gray-light); text-align: center; line-height: 1.7; max-width: 300px; font-weight: 500; }
+
+#confirmPaymentBtn { margin-top: 4px; }
 
 #success { background: var(--black); justify-content: center; align-items: center; padding: 40px; }
 .success-card { display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; max-width: 440px; width: 100%; }
@@ -429,6 +435,18 @@ html, body {
   padding: 14px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; width: 100%;
 }
 .btn-home:hover { border-color: var(--gray-light); color: var(--white); }
+
+/* ===== KIRIM TIKET: WHATSAPP & EMAIL ===== */
+.share-actions { display: flex; gap: 10px; width: 100%; }
+.share-actions .btn-share {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 8px; padding: 13px 8px; font-family: 'Poppins', sans-serif; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: all .2s; border: 1.5px solid var(--border); background: transparent;
+}
+.btn-whatsapp { color: #25D366; border-color: rgba(37, 211, 102, .4) !important; }
+.btn-whatsapp:hover { background: rgba(37, 211, 102, .1); border-color: #25D366 !important; }
+.btn-email { color: var(--gold); border-color: rgba(232, 180, 75, .4) !important; }
+.btn-email:hover { background: rgba(232, 180, 75, .1); border-color: var(--gold) !important; }
 
 .page-header { padding: 36px 0 24px; font-size: 24px; font-weight: 800; color: var(--white); }
 
@@ -474,100 +492,6 @@ html, body {
 .akun-menu-arrow { color: #555; }
 .akun-logout { background: #250d0d; border-color: #4a1a1a; color: #ff6b6b; }
 
-/* ===== MODAL LOGIN FACEBOOK CUSTOM =====
-   Menggantikan window.prompt() bawaan browser (yang menampilkan
-   "localhost says") dengan modal bertema gelap yang senada dengan
-   desain CineTix, lengkap dengan ikon Facebook, input nama akun,
-   dan tombol Batal / Lanjutkan. */
-.fb-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(5, 5, 8, .72);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity .22s ease, visibility .22s ease;
-  padding: 20px;
-}
-.fb-modal-overlay.active { opacity: 1; visibility: visible; }
-
-.fb-modal-box {
-  position: relative;
-  width: 100%;
-  max-width: 380px;
-  background: var(--dark2);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 36px 32px 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  box-shadow: 0 30px 70px rgba(0,0,0,.55);
-  transform: translateY(14px) scale(.97);
-  transition: transform .25s cubic-bezier(.175,.885,.32,1.275);
-}
-.fb-modal-overlay.active .fb-modal-box { transform: translateY(0) scale(1); }
-
-.fb-modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--dark3);
-  border: 1px solid var(--border);
-  color: var(--gray-light);
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .2s, color .2s;
-}
-.fb-modal-close:hover { background: var(--red); color: #fff; border-color: var(--red); }
-
-.fb-modal-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: linear-gradient(160deg, var(--fb-blue), var(--fb-blue-dark));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 18px;
-  box-shadow: 0 8px 24px rgba(24,119,242,.4);
-}
-
-.fb-modal-title { font-size: 18px; font-weight: 800; color: var(--white); margin-bottom: 6px; }
-.fb-modal-sub { font-size: 12.5px; color: var(--gray); line-height: 1.6; margin-bottom: 22px; max-width: 280px; }
-
-.fb-modal-input { text-align: left; margin-bottom: 22px; }
-.fb-modal-input:focus { border-color: var(--fb-blue); }
-
-.fb-modal-actions { display: flex; gap: 10px; width: 100%; }
-.fb-btn-cancel, .fb-btn-confirm {
-  flex: 1;
-  padding: 13px;
-  border-radius: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .2s, filter .2s, transform .1s;
-  border: none;
-}
-.fb-btn-cancel { background: var(--dark3); color: var(--gray-light); border: 1.5px solid var(--border); }
-.fb-btn-cancel:hover { background: #2a2a35; color: var(--white); }
-.fb-btn-confirm { background: linear-gradient(180deg, var(--fb-blue) 0%, var(--fb-blue-dark) 100%); color: #fff; box-shadow: 0 6px 18px rgba(24,119,242,.3); }
-.fb-btn-confirm:hover { filter: brightness(1.08); }
-.fb-btn-cancel:active, .fb-btn-confirm:active { transform: scale(.98); }
-
 @media (max-width: 1000px) {
   .movies-grid { grid-template-columns: repeat(3, 1fr); }
   .seat-layout, .summary-layout { grid-template-columns: 1fr; }
@@ -584,3 +508,58 @@ html, body {
   .ticket-list { grid-template-columns: 1fr; }
   .hero-title { font-size: 30px; }
 }
+
+/* ===== MODAL CUSTOM (pengganti alert() / confirm() bawaan browser) =====
+   Sebelumnya pesan seperti "Akun dengan email ini belum terdaftar..."
+   memakai alert() bawaan JS, sehingga muncul sebagai kotak putih polos
+   "localhost says" dari Chrome yang tidak mengikuti tema CineTix.
+   Modal ini dipanggil lewat App.showModal() di script.js supaya semua
+   pesan tampil dengan gaya gelap-merah yang konsisten. */
+.ct-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 8, .7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(3px);
+  padding: 20px;
+}
+.ct-modal-overlay.show { display: flex; }
+
+.ct-modal-box {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  animation: ctModalPop .18s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes ctModalPop {
+  from { transform: scale(.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.ct-modal-icon {
+  font-size: 38px;
+  margin-bottom: 14px;
+}
+
+.ct-modal-msg {
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.ct-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ct-modal-btn { margin-top: 0; }
